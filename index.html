@@ -2,1233 +2,312 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>ПОСЛЕДНИЙ КРЕСТ: МОЛНИЯ V2</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>ПОСЛЕДНИЙ КРЕСТ: МОЛНИЯ</title>
 <style>
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: #050510;
-  color: white;
-  font-family: Arial, sans-serif;
-  text-align: center;
-  overflow: hidden;
-  touch-action: none;
-  user-select: none;
-}
-
-#intro {
-  position: fixed;
-  inset: 0;
-  background: rgba(5,5,16,.97);
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-#intro h1 {
-  font-size: clamp(25px, 7vw, 38px);
-  color: #ffe600;
-  text-shadow: 0 0 20px yellow, 0 0 40px purple;
-  margin: 10px 0;
-}
-
-#intro p {
-  line-height: 1.6;
-}
-
-#startBtn {
-  padding: 17px 35px;
-  font-size: 22px;
-  color: #111;
-  background: #ffe600;
-  border: none;
-  border-radius: 15px;
-  font-weight: bold;
-  box-shadow: 0 0 25px #ffe600;
-  cursor: pointer;
-  margin-top: 15px;
-}
-
-#hud {
-  padding: 9px 4px;
-  font-size: clamp(12px, 3.5vw, 17px);
-  white-space: nowrap;
-}
-
-#hp {
-  color: #ff6666;
-}
-
-#bossBar {
-  width: 90%;
-  max-width: 600px;
-  height: 22px;
-  background: #222;
-  margin: 5px auto;
-  display: none;
-  border: 2px solid red;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-#bossFill {
-  height: 100%;
-  width: 100%;
-  background: linear-gradient(90deg, red, orange);
-  transition: width .15s;
-}
-
-#bossName {
-  color: #ff4444;
-  font-weight: bold;
-  min-height: 22px;
-}
-
-#game {
-  position: relative;
-  width: min(
-    calc(100vw - 12px),
-    calc(100dvh - 150px),
-    680px
-  );
-  aspect-ratio: 1 / 1;
-  margin: auto;
-  border: 3px solid #ffe600;
-  border-radius: 7px;
-  background: radial-gradient(
-    circle,
-    #182038 0%,
-    #0f1420 65%,
-    #090b16 100%
-  );
-  overflow: hidden;
-  touch-action: none;
-  cursor: crosshair;
-}
-
-#player {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 38px;
-  z-index: 10;
-  pointer-events: none;
-}
-
-#player.invulnerable {
-  animation: blink .18s infinite alternate;
-}
-
-@keyframes blink {
-  from { opacity: 1; }
-  to { opacity: .25; }
-}
-
-#finger {
-  position: absolute;
-  width: 35px;
-  height: 35px;
-  border: 2px dashed #ffe600;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  opacity: .55;
-  z-index: 8;
-  pointer-events: none;
-}
-
-.cross {
-  position: absolute;
-  font-size: 42px;
-  z-index: 9;
-  width: 50px;
-  height: 50px;
-  line-height: 50px;
-  text-align: center;
-  transform: translate(-50%, -50%);
-  filter:
-    drop-shadow(0 0 10px yellow)
-    drop-shadow(0 0 20px purple);
-  pointer-events: none;
-  will-change: left, top, transform;
-}
-
-.monster {
-  position: absolute;
-  font-size: 32px;
-  z-index: 5;
-  line-height: 1;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
-.monster.boss {
-  font-size: 78px;
-  filter: drop-shadow(0 0 15px red);
-}
-
-.monster.hit {
-  filter:
-    brightness(2)
-    drop-shadow(0 0 15px yellow);
-}
-
-.bullet {
-  position: absolute;
-  font-size: 21px;
-  transform: translate(-50%, -50%);
-  z-index: 6;
-  pointer-events: none;
-}
-
-.zap {
-  position: absolute;
-  font-size: 50px;
-  transform: translate(-50%, -50%);
-  z-index: 30;
-  pointer-events: none;
-  animation: zapAnim .35s forwards;
-}
-
-@keyframes zapAnim {
-  0% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(.4);
-  }
-  50% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.5);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(2);
-  }
-}
-
-#flash {
-  position: absolute;
-  inset: 0;
-  background: yellow;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 20;
-}
-
-#flash.active {
-  animation: flashAnim .18s;
-}
-
-@keyframes flashAnim {
-  0% { opacity: .35; }
-  100% { opacity: 0; }
-}
-
-#waveMessage {
-  position: absolute;
-  top: 30%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 95%;
-  font-size: clamp(22px, 6vw, 36px);
-  font-weight: bold;
-  color: #ffe600;
-  text-shadow: 0 0 15px orange;
-  z-index: 40;
-  opacity: 0;
-  pointer-events: none;
-}
-
-#waveMessage.show {
-  animation: messageAnim 1.5s forwards;
-}
-
-@keyframes messageAnim {
-  0% { opacity: 0; transform: translate(-50%,20px); }
-  20% { opacity: 1; transform: translate(-50%,0); }
-  75% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-#footer {
-  padding: 9px;
-  font-size: 12px;
-  color: #aaa;
-}
+*{box-sizing:border-box}
+:root{color-scheme:dark}
+body{margin:0;min-height:100dvh;background:#050510;color:#fff;font-family:Arial,sans-serif;text-align:center;overflow:hidden;user-select:none}
+#intro{position:fixed;inset:0;background:rgba(5,5,16,.97);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow:auto}
+#intro h1{font-size:clamp(25px,7vw,36px);color:#ffe600;text-shadow:0 0 20px #ff0,0 0 35px purple;margin:8px 0}
+#intro p{line-height:1.6;margin:10px 0}
+#startBtn{padding:16px 30px;font-size:20px;background:#ffe600;color:#111;border:0;border-radius:15px;font-weight:bold;box-shadow:0 0 25px #ffe600;cursor:pointer;margin-top:15px}
+#hud{padding:7px 2px 2px;font-size:clamp(11px,3.2vw,16px)}
+#speedInfo{color:#ffe600;font-size:12px;display:block;margin-top:3px}
+#bossBar{width:90%;max-width:600px;height:20px;background:#222;margin:4px auto;display:none;border:2px solid red;border-radius:10px;overflow:hidden}
+#bossFill{height:100%;width:100%;background:linear-gradient(90deg,red,orange)}
+#bossName{color:#f66;font-weight:bold;min-height:19px;font-size:14px}
+#game{position:relative;width:min(calc(100vw - 12px),calc(100dvh - 142px),680px);aspect-ratio:1/1;background:radial-gradient(circle,#192039,#0f1420 65%,#090b16);margin:auto;border:3px solid #ffe600;border-radius:6px;overflow:hidden;touch-action:none;cursor:crosshair}
+#player{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:38px;z-index:10;pointer-events:none}
+#player.invulnerable{animation:blink .18s infinite alternate}
+@keyframes blink{from{opacity:1}to{opacity:.22}}
+#finger{position:absolute;width:35px;height:35px;border:2px dashed #ffe600;border-radius:50%;transform:translate(-50%,-50%);z-index:8;opacity:.6;pointer-events:none}
+.cross{position:absolute;width:50px;height:50px;line-height:50px;font-size:42px;z-index:9;text-align:center;transform:translate(-50%,-50%);filter:drop-shadow(0 0 10px yellow) drop-shadow(0 0 20px purple);pointer-events:none}
+.monster{position:absolute;font-size:32px;line-height:1;transform:translate(-50%,-50%);z-index:5;pointer-events:none}
+.monster.boss{font-size:78px;filter:drop-shadow(0 0 12px red)}
+.monster.hit{filter:brightness(2) drop-shadow(0 0 15px yellow)}
+.bullet{position:absolute;font-size:21px;transform:translate(-50%,-50%);z-index:6;pointer-events:none}
+.zap{position:absolute;font-size:50px;transform:translate(-50%,-50%);z-index:30;pointer-events:none;animation:zapAnim .4s forwards}
+@keyframes zapAnim{0%{opacity:1;scale:.5}60%{opacity:1;scale:1.5}100%{opacity:0;scale:2}}
+#flash{position:absolute;inset:0;background:yellow;opacity:0;pointer-events:none;z-index:20}
+#flash.active{animation:flashAnim .2s}
+@keyframes flashAnim{from{opacity:.3}to{opacity:0}}
+#message{position:absolute;top:30%;left:50%;transform:translateX(-50%);width:95%;color:#ffe600;font-size:clamp(19px,5.5vw,32px);font-weight:bold;text-shadow:0 0 15px orange;opacity:0;pointer-events:none;z-index:45}
+#message.show{animation:messageAnim 1.6s forwards}
+@keyframes messageAnim{0%{opacity:0;translate:0 15px}20%{opacity:1;translate:0 0}75%{opacity:1}100%{opacity:0}}
+#upgrade{position:absolute;top:47%;left:50%;transform:translate(-50%,-50%);width:min(90%,350px);background:rgba(255,230,0,.97);color:#111;padding:15px;border-radius:15px;font-size:17px;font-weight:bold;z-index:50;display:none;box-shadow:0 0 30px yellow;pointer-events:none}
+#footer{font-size:12px;color:#aaa;padding:7px}
 </style>
 </head>
-
 <body>
-
 <div id="intro">
-  <div style="font-size:70px">✝️⚡✝️</div>
+  <div style="font-size:65px">✝️⚡✝️</div>
   <h1 id="introTitle">ПОСЛЕДНИЙ КРЕСТ</h1>
-  <p style="color:#ffe600;font-weight:bold">
-    МОЛНИЯ • ДВА КРЕСТА
-  </p>
-  <p id="introText">
-    👆 Управляй пальцем или мышью<br>
-    ✝️ Два креста вращаются вокруг указателя<br>
-    💥 Два попадания убивают монстра<br>
-    ⚡ Убитого монстра поражает молния<br>
-    👹 Каждая пятая волна — БОСС!
-  </p>
+  <p style="color:#ffe600;font-weight:bold">МОЛНИЯ · УЛУЧШЕНИЯ!</p>
+  <p id="introText">👆 Двигай пальцем или мышью: два креста вращаются вокруг указателя!<br>
+    💥 Обычный монстр: 2 попадания<br>
+    👹 Босс на каждой пятой волне: 6 попаданий<br>
+    ⭐ Победа над боссом ускоряет кресты и увеличивает радиус!</p>
   <button id="startBtn">⚡ ИГРАТЬ ⚡</button>
 </div>
-
-<div id="hud">
-  ✝️ <b style="color:#ffe600">ПОСЛЕДНИЙ КРЕСТ</b>
-  | ❤️ <span id="hp">100</span>
-  | 🌊 <span id="wave">1</span>
-  | 💀 <span id="kills">0</span>
+<div id="hud">✝️ <b style="color:#ffe600">ПОСЛЕДНИЙ КРЕСТ</b> | ❤️ <span id="hp">100</span> | Волна: <span id="wave">1</span> | Убито: <span id="kills">0</span>
+  <span id="speedInfo">⚡ Скорость крестов: 1.0x</span>
 </div>
-
-<div id="bossBar">
-  <div id="bossFill"></div>
-</div>
-
+<div id="bossBar"><div id="bossFill"></div></div>
 <div id="bossName"></div>
-
 <div id="game">
-  <div id="flash"></div>
-  <div id="waveMessage"></div>
-  <div id="finger"></div>
-  <div id="cross1" class="cross">✝️</div>
-  <div id="cross2" class="cross">✝️</div>
+  <div id="flash"></div><div id="finger"></div>
+  <div id="cross1" class="cross">✝️</div><div id="cross2" class="cross">✝️</div>
   <div id="player">🧑‍🦲</div>
+  <div id="message"></div><div id="upgrade"></div>
 </div>
-
-<div id="footer">
-  👆 Двигай пальцем или удерживай кнопку мыши
-</div>
-
+<div id="footer">👆 Палец или зажатая кнопка мыши · Каждый босс даёт улучшение!</div>
 <script>
-"use strict";
-
-// =============================
-// ЭЛЕМЕНТЫ
-// =============================
-
-const game = document.getElementById("game");
-const player = document.getElementById("player");
-const fingerEl = document.getElementById("finger");
-
-const crosses = [
-  document.getElementById("cross1"),
-  document.getElementById("cross2")
-];
-
-const hpEl = document.getElementById("hp");
-const waveEl = document.getElementById("wave");
-const killsEl = document.getElementById("kills");
-
-const bossBar = document.getElementById("bossBar");
-const bossFill = document.getElementById("bossFill");
-const bossName = document.getElementById("bossName");
-
-const intro = document.getElementById("intro");
-const introTitle = document.getElementById("introTitle");
-const introText = document.getElementById("introText");
-const startBtn = document.getElementById("startBtn");
-const waveMessage = document.getElementById("waveMessage");
-const flashEl = document.getElementById("flash");
-
-// =============================
-// НАСТРОЙКИ
-// =============================
-
-const CONFIG = {
-  playerHP: 100,
-
-  monsterHP: 2,
-  bossHP: 20,
-
-  monsterSpeed: 65,
-  bossSpeed: 26,
-
-  crossSpeed: 8,
-  crossRadius: 0.17,
-  crossHitRadius: 22,
-  crossHitCooldown: 0.28,
-
-  monsterDamage: 6,
-  bossDamage: 12,
-  bulletDamage: 10,
-
-  playerInvulnerability: 0.8,
-
-  bulletSpeed: 135,
-  bulletInterval: 1.3,
-
-  spawnInterval: 0.85,
-  baseEnemies: 8,
-  enemiesPerWave: 3,
-
-  waveDelay: 1.7
-};
-
-// =============================
-// СОСТОЯНИЕ ИГРЫ
-// =============================
-
-let state = "menu";
-
-let hp = 100;
-let wave = 1;
-let kills = 0;
-
-let monsters = [];
-let bullets = [];
-
-let boss = null;
-
-let spawned = 0;
-let waveTarget = 0;
-
-let spawnTimer = 0;
-let bulletTimer = 0;
-let waveTimer = 0;
-
-let invulnerable = 0;
-
-let angle = 0;
-let lastTime = 0;
-
-let fingerX = 0;
-let fingerY = 0;
-
-let activePointer = null;
-let audioCtx = null;
-
-let crossPositions = [
-  {x:0,y:0},
-  {x:0,y:0}
-];
-
-// =============================
-// ГЕОМЕТРИЯ
-// =============================
-
-function arena() {
-  return {
-    w: game.clientWidth,
-    h: game.clientHeight
-  };
+'use strict';
+const $ = id => document.getElementById(id);
+const game=$('game'), player=$('player'), fingerEl=$('finger');
+const crosses=[$('cross1'),$('cross2')];
+const CFG={maxHP:100,monsterHP:2,bossHP:6,monsterSpeed:65,bossSpeed:26,
+  baseAngularSpeed:3.6,baseOrbit:0.14,hitCooldown:0.23,
+  spawnInterval:0.85,bulletInterval:2,bulletSpeed:135,
+  playerInvulnerability:0.8,waveDelay:2};
+let state='menu',hp=100,wave=1,kills=0,monsters=[],bullets=[],boss=null;
+let waveTarget=0,spawned=0,spawnTimer=0,bulletTimer=0,waveTimer=0;
+let invulnerable=0,angle=0,angularSpeed=CFG.baseAngularSpeed,orbitRatio=CFG.baseOrbit,upgradeLevel=0;
+let fingerX=0,fingerY=0,activePointer=null,audioCtx=null,lastTime=null;
+let crossPositions=[{x:0,y:0},{x:0,y:0}];
+const arena=()=>({w:game.clientWidth,h:game.clientHeight});
+const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+const dist=(x1,y1,x2,y2)=>Math.hypot(x2-x1,y2-y1);
+function pos(el,x,y){el.style.left=x+'px';el.style.top=y+'px'}
+function segmentDistance(px,py,ax,ay,bx,by){
+  const dx=bx-ax,dy=by-ay,len2=dx*dx+dy*dy;
+  const t=len2===0?0:clamp(((px-ax)*dx+(py-ay)*dy)/len2,0,1);
+  return dist(px,py,ax+dx*t,ay+dy*t);
 }
-
-function distance(x1,y1,x2,y2) {
-  return Math.hypot(x2-x1,y2-y1);
-}
-
-function clamp(v,min,max) {
-  return Math.max(min,Math.min(max,v));
-}
-
-function position(el,x,y) {
-  el.style.left = x+"px";
-  el.style.top = y+"px";
-}
-
-function segmentDistance(px,py,ax,ay,bx,by) {
-  const dx=bx-ax;
-  const dy=by-ay;
-  const len2=dx*dx+dy*dy;
-
-  if(len2===0) {
-    return distance(px,py,ax,ay);
-  }
-
-  const t=clamp(
-    ((px-ax)*dx+(py-ay)*dy)/len2,
-    0,1
-  );
-
-  return distance(
-    px,py,
-    ax+t*dx,
-    ay+t*dy
-  );
-}
-
-// =============================
-// ЗВУК
-// =============================
-
-function sound(type) {
-  try {
-    if(!audioCtx) {
-      audioCtx = new (
-        window.AudioContext ||
-        window.webkitAudioContext
-      )();
-    }
-
-    if(audioCtx.state==="suspended") {
-      audioCtx.resume();
-    }
-
-    const osc=audioCtx.createOscillator();
-    const gain=audioCtx.createGain();
+function sound(type){
+  try{
+    if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended')audioCtx.resume();
     const now=audioCtx.currentTime;
-
-    if(type==="zap") {
-      osc.type="sawtooth";
-      osc.frequency.setValueAtTime(1400,now);
-      osc.frequency.exponentialRampToValueAtTime(
-        80,now+.15
-      );
-      gain.gain.setValueAtTime(.09,now);
-      gain.gain.exponentialRampToValueAtTime(
-        .001,now+.18
-      );
-      osc.stop(now+.18);
-    } else {
-      osc.type="square";
-      osc.frequency.setValueAtTime(400,now);
-      osc.frequency.exponentialRampToValueAtTime(
-        50,now+.3
-      );
-      gain.gain.setValueAtTime(.13,now);
-      gain.gain.exponentialRampToValueAtTime(
-        .001,now+.3
-      );
-      osc.stop(now+.3);
-    }
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(now);
-  } catch(e) {
-    // Без звука игра продолжает работать
+    const notes=type==='upgrade'?[523,659,784,1046]:[type==='zap'?1400:400];
+    notes.forEach((f,i)=>{
+      const o=audioCtx.createOscillator(),g=audioCtx.createGain(),start=now+i*.10;
+      o.type=type==='upgrade'?'sine':type==='zap'?'sawtooth':'square';
+      o.frequency.setValueAtTime(f,start);
+      if(type!=='upgrade')o.frequency.exponentialRampToValueAtTime(type==='zap'?80:50,start+(type==='zap'?.15:.3));
+      const duration=type==='upgrade'?.20:type==='zap'?.18:.30;
+      g.gain.setValueAtTime(type==='upgrade'?.10:.09,start);
+      g.gain.exponentialRampToValueAtTime(.001,start+duration);
+      o.connect(g);g.connect(audioCtx.destination);o.start(start);o.stop(start+duration);
+    });
+  }catch(e){/* звук необязателен */}
+}
+function flash(){$('flash').classList.remove('active');void $('flash').offsetWidth;$('flash').classList.add('active')}
+function showMessage(text){const m=$('message');m.textContent=text;m.classList.remove('show');void m.offsetWidth;m.classList.add('show')}
+function lightning(x,y){
+  for(const [symbol,offset] of [['⚡',-20],['💥',0]]){
+    const el=document.createElement('div');el.className='zap';el.textContent=symbol;
+    pos(el,x,y+offset);game.appendChild(el);setTimeout(()=>el.remove(),420);
   }
+  flash();sound('boom');
 }
-
-// =============================
-// ЭФФЕКТЫ
-// =============================
-
-function flash() {
-  flashEl.classList.remove("active");
-  void flashEl.offsetWidth;
-  flashEl.classList.add("active");
+function updateHUD(){
+  $('hp').textContent=Math.max(0,Math.ceil(hp));$('wave').textContent=wave;$('kills').textContent=kills;
+  $('speedInfo').textContent='⚡ Скорость крестов: '+(angularSpeed/CFG.baseAngularSpeed).toFixed(1)+'x'+(upgradeLevel?' · улучшений: '+upgradeLevel:'');
 }
-
-function lightningStrike(x,y) {
-  const z=document.createElement("div");
-  z.className="zap";
-  z.textContent="⚡";
-  position(z,x,y-20);
-  game.appendChild(z);
-
-  const boom=document.createElement("div");
-  boom.className="zap";
-  boom.textContent="💥";
-  position(boom,x,y);
-  game.appendChild(boom);
-
-  flash();
-  sound("boom");
-
-  setTimeout(()=>{
-    z.remove();
-    boom.remove();
-  },400);
+function showUpgrade(){
+  const u=$('upgrade');
+  u.innerHTML='⭐ УЛУЧШЕНИЕ!<br>⚡ КРЕСТЫ БЫСТРЕЕ!<br>Скорость '+(angularSpeed/CFG.baseAngularSpeed).toFixed(1)+'x';
+  u.style.display='block';sound('upgrade');flash();
+  clearTimeout(showUpgrade.timeout);
+  showUpgrade.timeout=setTimeout(()=>{u.style.display='none'},2200);
 }
-
-function showMessage(text) {
-  waveMessage.textContent=text;
-  waveMessage.classList.remove("show");
-  void waveMessage.offsetWidth;
-  waveMessage.classList.add("show");
+function giveUpgrade(){
+  upgradeLevel++;
+  if(upgradeLevel===1){angularSpeed=5.6;orbitRatio=.16;}
+  else if(upgradeLevel===2){angularSpeed=7.6;orbitRatio=.18;}
+  else{angularSpeed+=1.6;orbitRatio=Math.min(.23,orbitRatio+.005);}
+  keepFingerInBounds();updateHUD();showUpgrade();
 }
-
-// =============================
-// ИНТЕРФЕЙС
-// =============================
-
-function updateHUD() {
-  hpEl.textContent=Math.max(0,Math.ceil(hp));
-  waveEl.textContent=wave;
-  killsEl.textContent=kills;
+function orbitRadius(){const a=arena();return Math.min(a.w,a.h)*orbitRatio}
+function keepFingerInBounds(){
+  const a=arena(),margin=Math.min(orbitRadius()+14,a.w/2,a.h/2);
+  fingerX=clamp(fingerX,margin,a.w-margin);fingerY=clamp(fingerY,margin,a.h-margin);
+  pos(fingerEl,fingerX,fingerY);
 }
-
-function showBossBar() {
-  bossBar.style.display="block";
-  bossName.textContent="👹 МУТАНТ-ГИГАНТ!";
-  bossFill.style.width="100%";
+function setFinger(clientX,clientY){
+  if(state!=='playing')return;
+  const rect=game.getBoundingClientRect();
+  fingerX=clientX-rect.left-game.clientLeft;fingerY=clientY-rect.top-game.clientTop;
+  keepFingerInBounds();
 }
-
-function hideBossBar() {
-  bossBar.style.display="none";
-  bossName.textContent="";
-}
-
-function updateBossBar() {
-  if(boss) {
-    bossFill.style.width=
-      clamp(boss.hp/CONFIG.bossHP*100,0,100)+"%";
-  }
-}
-
-// =============================
-// УПРАВЛЕНИЕ
-// =============================
-
-function setFinger(clientX,clientY) {
-  if(state!=="playing") return;
-
-  const r=game.getBoundingClientRect();
-  const a=arena();
-
-  const orbit=Math.min(a.w,a.h)*CONFIG.crossRadius;
-  const margin=orbit+12;
-
-  fingerX=clamp(clientX-r.left,margin,a.w-margin);
-  fingerY=clamp(clientY-r.top,margin,a.h-margin);
-
-  position(fingerEl,fingerX,fingerY);
-}
-
-game.addEventListener("pointerdown",e=>{
-  if(state!=="playing") return;
-  if(activePointer!==null) return;
-
-  activePointer=e.pointerId;
-  game.setPointerCapture(e.pointerId);
-  setFinger(e.clientX,e.clientY);
-  e.preventDefault();
+game.addEventListener('pointerdown',e=>{
+  if(state!=='playing'||activePointer!==null)return;
+  activePointer=e.pointerId;game.setPointerCapture(e.pointerId);setFinger(e.clientX,e.clientY);e.preventDefault();
 });
-
-game.addEventListener("pointermove",e=>{
-  if(e.pointerId!==activePointer) return;
-  setFinger(e.clientX,e.clientY);
-  e.preventDefault();
-});
-
-function releasePointer(e) {
-  if(activePointer===e.pointerId) {
-    activePointer=null;
-  }
-}
-
-game.addEventListener("pointerup",releasePointer);
-game.addEventListener("pointercancel",releasePointer);
-game.addEventListener("lostpointercapture",releasePointer);
-
-// =============================
-// КРЕСТЫ
-// =============================
-
-function getCrossPosition(index) {
-  const a=arena();
-
-  const radius=
-    Math.min(a.w,a.h)*CONFIG.crossRadius;
-
-  const theta=angle+index*Math.PI;
-
-  return {
-    x:fingerX+Math.cos(theta)*radius,
-    y:fingerY+Math.sin(theta)*radius
-  };
-}
-
-function updateCrosses(dt) {
-  const previous=crossPositions.map(p=>({...p}));
-
-  angle+=CONFIG.crossSpeed*dt;
-
-  for(let i=0;i<2;i++) {
-    const p=getCrossPosition(i);
-    crossPositions[i]=p;
-
-    position(crosses[i],p.x,p.y);
-
-    crosses[i].style.transform=
-      `translate(-50%,-50%) rotate(${angle+i*Math.PI}rad)`;
-  }
-
-  return previous;
-}
-
-// =============================
-// МОНСТРЫ
-// =============================
-
-function spawnMonster(isBoss=false) {
-  const a=arena();
-
-  const side=Math.floor(Math.random()*4);
-  let x,y;
-
-  if(side===0) {
-    x=Math.random()*a.w;
-    y=-30;
-  } else if(side===1) {
-    x=a.w+30;
-    y=Math.random()*a.h;
-  } else if(side===2) {
-    x=Math.random()*a.w;
-    y=a.h+30;
-  } else {
-    x=-30;
-    y=Math.random()*a.h;
-  }
-
-  const el=document.createElement("div");
-  el.className=isBoss?"monster boss":"monster";
-
-  el.textContent=isBoss
-    ? "👹"
-    : ["🧟","💀","👻","😈"][
-        Math.floor(Math.random()*4)
-      ];
-
-  position(el,x,y);
-  game.appendChild(el);
-
-  const monster={
-    el,
-    x,y,
-    hp:isBoss?CONFIG.bossHP:CONFIG.monsterHP,
-    boss:isBoss,
-    alive:true,
-    hitTimers:[0,0],
-    hitVisual:0
-  };
-
-  monsters.push(monster);
-
-  if(isBoss) {
-    boss=monster;
-    showBossBar();
-    showMessage("👹 БОСС!");
-  }
-
-  return monster;
-}
-
-function killMonster(m) {
-  if(!m.alive) return;
-
-  m.alive=false;
-
-  lightningStrike(m.x,m.y);
-  m.el.remove();
-
-  kills++;
-
-  if(m.boss) {
-    boss=null;
-    hideBossBar();
-
-    hp=Math.min(100,hp+25);
-
-    showMessage("⚡ БОСС УНИЧТОЖЕН! +25 HP");
-  }
-
-  updateHUD();
-}
-
-function moveMonster(m,dt) {
-  const a=arena();
-
-  const targetX=a.w/2;
-  const targetY=a.h/2;
-
-  const dx=targetX-m.x;
-  const dy=targetY-m.y;
-  const d=Math.hypot(dx,dy);
-
-  const speed=m.boss
-    ? CONFIG.bossSpeed
-    : CONFIG.monsterSpeed;
-
-  // Скорости масштабируются под размер арены
-  const scale=Math.min(a.w,a.h)/360;
-  const step=Math.min(d,speed*scale*dt);
-
-  if(d>0) {
-    m.x+=dx/d*step;
-    m.y+=dy/d*step;
-  }
-
-  position(m.el,m.x,m.y);
-}
-
-function damageMonster(m,amount) {
-  if(!m.alive) return;
-
-  m.hp-=amount;
-
-  sound("zap");
-
-  m.hitVisual=.12;
-  m.el.classList.add("hit");
-
-  if(m.boss) updateBossBar();
-
-  if(m.hp<=0) {
-    killMonster(m);
-  }
-}
-
-// =============================
-// ПОПАДАНИЯ КРЕСТОВ
-// =============================
-
-function checkCrossHits(m,previous,dt) {
-  const a=arena();
-  const scale=Math.min(a.w,a.h)/360;
-
-  const radius=
-    CONFIG.crossHitRadius*scale+
-    (m.boss?24:12)*scale;
-
-  for(let i=0;i<2;i++) {
-    if(!m.alive) break;
-    if(m.hitTimers[i]>0) continue;
-
-    const old=previous[i];
-    const current=crossPositions[i];
-
-    // Проверяем весь пройденный участок,
-    // а не только конечное положение креста.
-    const d=segmentDistance(
-      m.x,m.y,
-      old.x,old.y,
-      current.x,current.y
-    );
-
-    if(d<radius) {
-      damageMonster(m,1);
-      m.hitTimers[i]=CONFIG.crossHitCooldown;
-    }
-  }
-}
-
-// =============================
-// УРОН ИГРОКУ
-// =============================
-
-function damagePlayer(amount) {
-  if(invulnerable>0 || state!=="playing") {
-    return;
-  }
-
-  hp=Math.max(0,hp-amount);
-
-  invulnerable=CONFIG.playerInvulnerability;
-
-  player.classList.add("invulnerable");
-
-  flash();
-  sound("boom");
-  updateHUD();
-
-  if(hp<=0) {
-    gameOver();
-  }
-}
-
-// =============================
-// ПУЛИ БОССА
-// =============================
-
-function spawnBullet() {
-  if(!boss || !boss.alive) return;
-
-  const a=arena();
-
-  const dx=a.w/2-boss.x;
-  const dy=a.h/2-boss.y;
-  const d=Math.hypot(dx,dy);
-
-  if(d<1) return;
-
-  const el=document.createElement("div");
-  el.className="bullet";
-  el.textContent="🟢";
-
-  position(el,boss.x,boss.y);
-  game.appendChild(el);
-
-  const scale=Math.min(a.w,a.h)/360;
-
-  bullets.push({
-    el,
-    x:boss.x,
-    y:boss.y,
-    vx:dx/d*CONFIG.bulletSpeed*scale,
-    vy:dy/d*CONFIG.bulletSpeed*scale
+game.addEventListener('pointermove',e=>{if(e.pointerId===activePointer){setFinger(e.clientX,e.clientY);e.preventDefault()}});
+for(const name of ['pointerup','pointercancel','lostpointercapture'])game.addEventListener(name,e=>{if(e.pointerId===activePointer)activePointer=null});
+function getCrossPosition(i){const t=angle+i*Math.PI,r=orbitRadius();return{x:fingerX+Math.cos(t)*r,y:fingerY+Math.sin(t)*r}}
+function drawCrosses(){
+  crossPositions=crosses.map((el,i)=>{
+    const p=getCrossPosition(i);pos(el,p.x,p.y);
+    el.style.transform=`translate(-50%,-50%) rotate(${angle+i*Math.PI}rad)`;
+    return p;
   });
 }
-
-function updateBullets(dt) {
-  const a=arena();
-  const cx=a.w/2;
-  const cy=a.h/2;
-
-  const playerRadius=18*a.w/360;
-
-  for(const p of bullets) {
-    const oldX=p.x;
-    const oldY=p.y;
-
-    p.x+=p.vx*dt;
-    p.y+=p.vy*dt;
-
-    position(p.el,p.x,p.y);
-
-    const hit=segmentDistance(
-      cx,cy,
-      oldX,oldY,
-      p.x,p.y
-    )<playerRadius;
-
-    if(hit) {
-      p.dead=true;
-      p.el.remove();
-      damagePlayer(CONFIG.bulletDamage);
-      continue;
-    }
-
-    if(
-      p.x < -50 ||
-      p.x > a.w+50 ||
-      p.y < -50 ||
-      p.y > a.h+50
-    ) {
-      p.dead=true;
-      p.el.remove();
-    }
+function spawnMonster(isBoss=false){
+  const a=arena(),side=Math.floor(Math.random()*4),edge=35;
+  const x=side===1?a.w+edge:side===3?-edge:Math.random()*a.w;
+  const y=side===0?-edge:side===2?a.h+edge:Math.random()*a.h;
+  const el=document.createElement('div');el.className='monster'+(isBoss?' boss':'');
+  el.textContent=isBoss?'👹':['🧟','💀','👻','😈'][Math.floor(Math.random()*4)];
+  pos(el,x,y);game.appendChild(el);
+  const m={el,x,y,hp:isBoss?CFG.bossHP:CFG.monsterHP,boss:isBoss,alive:true,hitTimers:[0,0],hitVisual:0};
+  monsters.push(m);
+  if(isBoss){boss=m;$('bossBar').style.display='block';$('bossName').textContent='👹 БОСС! Победи его и получи улучшение!';$('bossFill').style.width='100%';showMessage('👹 БОСС!')}
+  return m;
+}
+function hideBoss(){$('bossBar').style.display='none';$('bossName').textContent=''}
+function killMonster(m){
+  if(!m.alive)return;
+  m.alive=false;m.el.remove();lightning(m.x,m.y);kills++;
+  if(m.boss){boss=null;hideBoss();hp=Math.min(CFG.maxHP,hp+25);giveUpgrade()}
+  updateHUD();
+}
+function hitMonster(m,index){
+  if(!m.alive||m.hitTimers[index]>0)return;
+  m.hp--;m.hitTimers[index]=CFG.hitCooldown;m.hitVisual=.12;m.el.classList.add('hit');sound('zap');
+  if(m.boss)$('bossFill').style.width=clamp(m.hp/CFG.bossHP*100,0,100)+'%';
+  if(m.hp<=0)killMonster(m);
+}
+function damagePlayer(damage){
+  if(state!=='playing'||invulnerable>0)return;
+  hp=Math.max(0,hp-damage);invulnerable=CFG.playerInvulnerability;
+  player.classList.add('invulnerable');flash();sound('boom');updateHUD();
+  if(hp<=0)gameOver();
+}
+function spawnBullet(){
+  if(!boss||!boss.alive)return;
+  const a=arena(),dx=a.w/2-boss.x,dy=a.h/2-boss.y,d=Math.hypot(dx,dy);
+  if(d<1)return;
+  const el=document.createElement('div');el.className='bullet';el.textContent='🟢';pos(el,boss.x,boss.y);game.appendChild(el);
+  const v=CFG.bulletSpeed*Math.min(a.w,a.h)/360;
+  bullets.push({el,x:boss.x,y:boss.y,vx:dx/d*v,vy:dy/d*v});
+}
+function updateBullets(dt){
+  const a=arena(),cx=a.w/2,cy=a.h/2,r=18*Math.min(a.w,a.h)/360;
+  for(const p of bullets){
+    const ox=p.x,oy=p.y;p.x+=p.vx*dt;p.y+=p.vy*dt;pos(p.el,p.x,p.y);
+    if(segmentDistance(cx,cy,ox,oy,p.x,p.y)<r){p.dead=true;p.el.remove();damagePlayer(10)}
+    else if(p.x< -50||p.x>a.w+50||p.y< -50||p.y>a.h+50){p.dead=true;p.el.remove()}
+    if(state!=='playing')break;
   }
-
   bullets=bullets.filter(p=>!p.dead);
 }
-
-// =============================
-// ВОЛНЫ
-// =============================
-
-function startWave() {
-  if(state!=="playing") return;
-
-  monsters.forEach(m=>m.el.remove());
-  monsters=[];
-
-  bullets.forEach(b=>b.el.remove());
-  bullets=[];
-
-  boss=null;
-  hideBossBar();
-
-  spawned=0;
-  spawnTimer=0;
-  bulletTimer=0;
-
-  if(wave%5===0) {
-    waveTarget=1;
-    spawnMonster(true);
-    spawned=1;
-  } else {
-    waveTarget=
-      CONFIG.baseEnemies+
-      (wave-1)*CONFIG.enemiesPerWave;
-
-    showMessage("🌊 ВОЛНА "+wave);
-  }
-
+function startWave(){
+  if(state!=='playing')return;
+  monsters.forEach(m=>m.el.remove());bullets.forEach(p=>p.el.remove());
+  monsters=[];bullets=[];boss=null;hideBoss();
+  spawned=0;spawnTimer=0;bulletTimer=0;
+  if(wave%5===0){waveTarget=1;spawnMonster(true);spawned=1}
+  else{waveTarget=Math.min(35,8+(wave-1)*3);showMessage('🌊 ВОЛНА '+wave)}
   updateHUD();
 }
-
-function checkWaveComplete() {
-  if(spawned<waveTarget) return;
-  if(monsters.length>0) return;
-
-  state="betweenWaves";
-  waveTimer=CONFIG.waveDelay;
-
-  showMessage("✅ ВОЛНА ПРОЙДЕНА!");
-}
-
-function nextWave() {
-  wave++;
-  state="playing";
-  startWave();
-}
-
-// =============================
-// ОБНОВЛЕНИЕ МОНСТРОВ
-// =============================
-
-function updateMonsters(dt,previous) {
-  const a=arena();
-  const cx=a.w/2;
-  const cy=a.h/2;
-  const scale=Math.min(a.w,a.h)/360;
-
-  for(const m of monsters) {
-    if(!m.alive) continue;
-
-    for(let i=0;i<2;i++) {
-      m.hitTimers[i]=Math.max(
-        0,m.hitTimers[i]-dt
-      );
+function updateMonsters(dt,oldCrossPositions){
+  const a=arena(),cx=a.w/2,cy=a.h/2,scale=Math.min(a.w,a.h)/360;
+  for(const m of monsters){
+    if(!m.alive)continue;
+    for(let i=0;i<2;i++)m.hitTimers[i]=Math.max(0,m.hitTimers[i]-dt);
+    if(m.hitVisual>0){m.hitVisual-=dt;if(m.hitVisual<=0)m.el.classList.remove('hit')}
+    const dx=cx-m.x,dy=cy-m.y,d=Math.hypot(dx,dy);
+    const speed=(m.boss?CFG.bossSpeed:CFG.monsterSpeed)*scale,step=Math.min(d,speed*dt);
+    if(d>0){m.x+=dx/d*step;m.y+=dy/d*step}
+    pos(m.el,m.x,m.y);
+    const hitRadius=(m.boss?43:31)*scale;
+    // Проверяем дугу несколькими отрезками. На высокой скорости креста
+    // не возникает больших разрывов между проверками.
+    for(let i=0;i<2;i++){
+      if(!m.alive||m.hitTimers[i]>0)continue;
+      const old=oldCrossPositions[i],cur=crossPositions[i];
+      if(segmentDistance(m.x,m.y,old.x,old.y,cur.x,cur.y)<hitRadius)hitMonster(m,i);
     }
-
-    if(m.hitVisual>0) {
-      m.hitVisual-=dt;
-
-      if(m.hitVisual<=0) {
-        m.el.classList.remove("hit");
-      }
+    if(!m.alive)continue;
+    if(dist(m.x,m.y,cx,cy)<(m.boss?37:20)*scale){
+      if(m.boss){
+        // Босс не исчезает от касания: его нужно именно победить.
+        damagePlayer(12);
+        if(state!=='playing')break;
+        const dd=dist(m.x,m.y,cx,cy);
+        const ux=dd>0?(m.x-cx)/dd:1,uy=dd>0?(m.y-cy)/dd:0;
+        m.x=cx+ux*80*scale;
+        m.y=cy+uy*80*scale;
+        pos(m.el,m.x,m.y);
+      }else{m.alive=false;m.el.remove();damagePlayer(6);if(state!=='playing')break}
     }
-
-    moveMonster(m,dt);
-    checkCrossHits(m,previous,dt);
-
-    if(!m.alive) continue;
-
-    const contactRadius=
-      (m.boss?38:22)*scale;
-
-    if(distance(m.x,m.y,cx,cy)<contactRadius) {
-      m.alive=false;
-      m.el.remove();
-
-      damagePlayer(
-        m.boss
-          ? CONFIG.bossDamage
-          : CONFIG.monsterDamage
-      );
-
-      if(m.boss) {
-        boss=null;
-        hideBossBar();
-      }
-    }
-
-    if(state!=="playing") break;
   }
-
   monsters=monsters.filter(m=>m.alive);
 }
-
-// =============================
-// ИГРОВОЙ ЦИКЛ
-// =============================
-
-function update(dt) {
-  if(state==="betweenWaves") {
-    waveTimer-=dt;
-
-    if(waveTimer<=0) {
-      nextWave();
-    }
-
-    return;
-  }
-
-  if(state!=="playing") return;
-
+function update(dt){
+  if(state==='between'){waveTimer-=dt;if(waveTimer<=0){wave++;state='playing';startWave()}return}
+  if(state!=='playing')return;
   invulnerable=Math.max(0,invulnerable-dt);
-
-  if(invulnerable===0) {
-    player.classList.remove("invulnerable");
-  }
-
-  const previous=updateCrosses(dt);
-
-  if(wave%5!==0) {
+  if(invulnerable===0)player.classList.remove('invulnerable');
+  if(wave%5!==0&&spawned<waveTarget){
     spawnTimer+=dt;
-
-    if(spawned<waveTarget) {
-      if(spawnTimer>=CONFIG.spawnInterval) {
-        spawnTimer-=CONFIG.spawnInterval;
-        spawnMonster(false);
-        spawned++;
-      }
-    }
+    if(spawnTimer>=CFG.spawnInterval){spawnTimer-=CFG.spawnInterval;spawnMonster();spawned++}
   }
-
-  if(boss && boss.alive) {
-    bulletTimer+=dt;
-
-    if(bulletTimer>=CONFIG.bulletInterval) {
-      bulletTimer-=CONFIG.bulletInterval;
-      spawnBullet();
-    }
+  if(boss&&boss.alive){bulletTimer+=dt;if(bulletTimer>=CFG.bulletInterval){bulletTimer-=CFG.bulletInterval;spawnBullet()}}
+  // Малые шаги важны для точных попаданий быстро вращающихся крестов.
+  const steps=Math.max(1,Math.ceil(angularSpeed*dt/.12));
+  const subdt=dt/steps;
+  for(let n=0;n<steps&&state==='playing';n++){
+    const previous=crossPositions.map(p=>({...p}));
+    angle+=angularSpeed*subdt;drawCrosses();
+    updateMonsters(subdt,previous);
   }
-
-  updateMonsters(dt,previous);
-
-  if(state!=="playing") return;
-
+  if(state!=='playing')return;
   updateBullets(dt);
-
-  if(state!=="playing") return;
-
-  checkWaveComplete();
+  if(state!=='playing')return;
+  if(spawned===waveTarget&&monsters.length===0){state='between';waveTimer=CFG.waveDelay;showMessage('✅ ВОЛНА ПРОЙДЕНА!')}
 }
-
-function gameLoop(time) {
-  if(!lastTime) lastTime=time;
-
-  // Ограничиваем скачок времени после сворачивания вкладки
-  const dt=Math.min((time-lastTime)/1000,.04);
-  lastTime=time;
-
-  update(dt);
-
-  requestAnimationFrame(gameLoop);
+function loop(time){
+  if(lastTime===null)lastTime=time;
+  const dt=Math.min((time-lastTime)/1000,.04);lastTime=time;
+  update(dt);requestAnimationFrame(loop);
 }
-
-// =============================
-// НАЧАЛО И КОНЕЦ ИГРЫ
-// =============================
-
-function cleanup() {
-  monsters.forEach(m=>m.el.remove());
-  bullets.forEach(b=>b.el.remove());
-
-  monsters=[];
-  bullets=[];
-
-  game.querySelectorAll(".zap").forEach(el=>el.remove());
-
-  boss=null;
-  hideBossBar();
-
-  player.classList.remove("invulnerable");
+function clearArena(){
+  monsters.forEach(m=>m.el.remove());bullets.forEach(p=>p.el.remove());
+  game.querySelectorAll('.zap').forEach(el=>el.remove());
+  monsters=[];bullets=[];boss=null;hideBoss();player.classList.remove('invulnerable');
+  clearTimeout(showUpgrade.timeout);$('upgrade').style.display='none';
 }
-
-function startGame() {
-  cleanup();
-
-  hp=CONFIG.playerHP;
-  wave=1;
-  kills=0;
-
-  spawned=0;
-  spawnTimer=0;
-  bulletTimer=0;
-  waveTimer=0;
-
-  invulnerable=0;
-  angle=0;
-
-  activePointer=null;
-
-  const a=arena();
-
-  fingerX=a.w/2;
-  fingerY=a.h/2;
-
-  position(fingerEl,fingerX,fingerY);
-
-  for(let i=0;i<2;i++) {
-    crossPositions[i]=getCrossPosition(i);
-    position(
-      crosses[i],
-      crossPositions[i].x,
-      crossPositions[i].y
-    );
+function startGame(){
+  clearArena();hp=CFG.maxHP;wave=1;kills=0;upgradeLevel=0;
+  angularSpeed=CFG.baseAngularSpeed;orbitRatio=CFG.baseOrbit;angle=0;
+  invulnerable=0;activePointer=null;lastTime=null;
+  const a=arena();fingerX=a.w/2;fingerY=a.h/2;keepFingerInBounds();drawCrosses();
+  state='playing';$('intro').style.display='none';startWave();sound('zap');
+}
+function gameOver(){
+  state='gameover';activePointer=null;
+  $('introTitle').textContent='💀 ТЫ ПАЛ!';
+  $('introText').innerHTML=`🌊 Достигнута волна: <b>${wave}</b><br>💀 Убито: <b>${kills}</b><br>⭐ Улучшений: <b>${upgradeLevel}</b>`;
+  $('startBtn').textContent='🔄 ИГРАТЬ СНОВА';$('intro').style.display='flex';
+}
+$('startBtn').addEventListener('click',startGame);
+let lastSize=arena();
+window.addEventListener('resize',()=>{
+  const a=arena(),sx=a.w/lastSize.w,sy=a.h/lastSize.h;
+  if(Number.isFinite(sx)&&Number.isFinite(sy)&&sx>0&&sy>0){
+    fingerX*=sx;fingerY*=sy;
+    monsters.forEach(m=>{m.x*=sx;m.y*=sy;pos(m.el,m.x,m.y)});
+    bullets.forEach(p=>{p.x*=sx;p.y*=sy;p.vx*=sx;p.vy*=sy;pos(p.el,p.x,p.y)});
+    keepFingerInBounds();drawCrosses();
   }
-
-  state="playing";
-
-  intro.style.display="none";
-
-  updateHUD();
-  startWave();
-
-  sound("zap");
-}
-
-function gameOver() {
-  state="gameover";
-
-  activePointer=null;
-
-  introTitle.textContent="💀 ТЫ ПАЛ!";
-  introText.innerHTML=
-    `🌊 Достигнута волна: <b>${wave}</b><br>`+
-    `💀 Уничтожено монстров: <b>${kills}</b><br><br>`+
-    `⚡ Попробуй продержаться дольше!`;
-
-  startBtn.textContent="🔄 ИГРАТЬ СНОВА";
-
-  intro.style.display="flex";
-}
-
-startBtn.addEventListener("click",startGame);
-
-// =============================
-// ИЗМЕНЕНИЕ РАЗМЕРА ЭКРАНА
-// =============================
-
-let lastArenaSize=null;
-
-function handleResize() {
-  const a=arena();
-
-  if(!lastArenaSize) {
-    lastArenaSize=a;
-    return;
-  }
-
-  if(state==="menu" || state==="gameover") {
-    lastArenaSize=a;
-    return;
-  }
-
-  const sx=a.w/lastArenaSize.w;
-  const sy=a.h/lastArenaSize.h;
-
-  fingerX*=sx;
-  fingerY*=sy;
-
-  position(fingerEl,fingerX,fingerY);
-
-  monsters.forEach(m=>{
-    m.x*=sx;
-    m.y*=sy;
-    position(m.el,m.x,m.y);
-  });
-
-  bullets.forEach(b=>{
-    b.x*=sx;
-    b.y*=sy;
-    b.vx*=sx;
-    b.vy*=sy;
-    position(b.el,b.x,b.y);
-  });
-
-  crossPositions=crossPositions.map(p=>({
-    x:p.x*sx,
-    y:p.y*sy
-  }));
-
-  lastArenaSize=a;
-}
-
-window.addEventListener("resize",handleResize);
-
-// =============================
-// ЗАПУСК ЦИКЛА
-// =============================
-
-lastArenaSize=arena();
-requestAnimationFrame(gameLoop);
-
+  lastSize=a;
+});
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
